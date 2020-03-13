@@ -1,0 +1,121 @@
+
+
+import Path
+import TensorFlow
+import matmul
+
+import datablock
+import early_stoping
+import loadData
+
+import callbacks
+import minibatch_training
+import matmul
+import fully_connected
+import batchnorm
+import fastai_layers
+
+
+
+import Python
+let plt = Python.import("matplotlib.pyplot")
+
+// First things first, we need to download Imagenette and untar it. 
+// What follows is very close to what we did for MNIST.
+public let dataPath = Path.home/".fastai"/"data"
+let path = downloadImagenette(path:dataPath,sz:"-320")
+// If we look at path.ls(), we see it returns a list of entries, 
+// which are structures with a kind and a path attribute. 
+// The kind is an enum that can be file or directory. 
+// path then points to the corresponding location.
+
+for e in try path.ls() {  print("\(e.path) (\(e.kind == .directory ? "directory": "file"))")}
+for e in try (path/"val").ls() { print("\(e.path) (\(e.kind == .directory ? "directory": "file"))")}
+
+// Let's have a look inside a class folder (the first class is tench):
+let pathTench = path/"val"/"n01440764"
+let imgFn = Path.home/".fastai/data/imagenette-320/val/n01440764/ILSVRC2012_val_00006697.JPEG"
+print(imgFn)
+
+// We will use tf.data to read and resize our images in parallel. tf.data needs to operate on tensors, 
+// so we convert our Path image filename to that format. 
+// We can then apply the extensions that we defined previously in 01.
+
+let decodedImg = StringTensor(readFile: imgFn.string).decodeJpeg(channels: 3)
+print(decodedImg.shape)
+// [320, 426, 3]
+// By converting this image to numpy, we can use plt to plot it:
+showImg(decodedImg)
+ let fNames = fetchFiles(path: path, recurse: true, extensions: ["jpeg", "jpg"])
+//time {let fNames = fetchFiles(path: path, recurse: true, extensions: ["jpeg", "jpg"]) }
+print(fNames.count == 13394)
+//true
+
+let il = ItemList(fromFolder: path, extensions: ["jpeg", "jpg"])
+let sd = SplitData(il) { grandParentSplitter(fName: $0, valid: "val") }
+
+var (procItem,procLabel) = (NoopProcessor<Path>(),CategoryProcessor())
+let sld = SplitLabeledData(sd, fromFunc: parentLabeler, procItem: &procItem, procLabel: &procLabel)
+
+print("training label: ",sld.train.labels[0])
+// training label:  7
+
+print("raw label: ",sld.train.rawLabel(0))
+//raw label:  n03425413
+
+print(" train vocabulary: ",sld.train.procLabel.vocab!)
+//  train vocabulary:  ["n01440764", "n02102040", "n02979186", "n03000684",
+//   "n03028079", "n03394916", "n03417042", "n03425413", "n03445777", "n03888257"]
+
+let dataset = sld.toDataBunch(itemToTensor: pathsToTensor, labelToTensor: intsToTensor)
+//print("dataset value: ",dataset)
+
+//crash here coredump
+// openAndResize crash when calling StringTensor to decode the jpeg image
+ let tfmData = transformData(dataset) { openAndResize(fname: $0, size: 128) }
+
+ let batch = tfmData.train.oneBatch()!
+ print(batch.xb.shape)
+
+ let labels = batch.yb.scalars.map { sld.train.procLabel.vocab![Int($0)] }
+ showImages(batch.xb, labels: labels)
+
+// 1.2.6  To summarize:¶
+let il2 = ItemList(fromFolder: path, extensions: ["jpeg", "jpg"])
+let sd2 = SplitData(il2, fromFunc: {grandParentSplitter(fName: $0, valid: "val")})
+var (procItem2,procLabel2) = (NoopProcessor<Path>(), CategoryProcessor())
+ let sld2 = SplitLabeledData(sd2, fromFunc: parentLabeler, procItem: &procItem2, procLabel: &procLabel2)
+ var rawData2 = sld2.toDataBunch(itemToTensor: pathsToTensor, labelToTensor: intsToTensor, bs: 256)
+ var data2 = transformData(rawData2) { openAndResize(fname: $0, size: 224) }
+// transformData crash!
+
+// tf.data reads the whole file into memory if we shuffle!
+data2.train.shuffle = false
+
+//time { let _ = data.train.oneBatch() }
+
+func allBatches() -> (Int,TF) {
+    var m = TF(zeros: [224, 224, 3])
+    var c: Int = 0
+    for batch in data2.train.ds { 
+        m += batch.xb.mean(squeezingAxes: 0) 
+        c += 1
+    }
+    return (c,m)
+}
+//time {let (c,m) = allBatches()}
+
+let il3 = ItemList(fromFolder: path, extensions: ["jpeg", "jpg"])
+let sd3 = SplitData(il3, fromFunc: {grandParentSplitter(fName: $0, valid: "val")})
+var (procItem3,procLabel3) = (NoopProcessor<Path>(), CategoryProcessor())
+let sld3 = SplitLabeledData(sd3, fromFunc: parentLabeler, procItem: &procItem3, procLabel: &procLabel3)
+var rawData3 = sld3.toDataBunch(itemToTensor: pathsToTensor, labelToTensor: intsToTensor)
+let data3 = transformData(rawData3) { openAndResize(fname: $0, size: 128) }
+
+
+func optFunc(_ model: CNNModel) -> SGD<CNNModel> { return SGD(for: model, learningRate: 0.1) }
+func modelInit() -> CNNModel { return CNNModel(channelIn: 3, nOut: 10, filters: [64, 64, 128, 256]) }
+let learner = Learner(data: data3, lossFunc: crossEntropy, optFunc: optFunc, modelInit: modelInit)
+let recorder = learner.makeDefaultDelegates(metrics: [accuracy])
+learner.addDelegate(learner.makeNormalize(mean: imagenetStats.mean, std: imagenetStats.std))
+try learner.fit(1)

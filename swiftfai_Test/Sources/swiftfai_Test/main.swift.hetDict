@@ -1,0 +1,14 @@
+import hetDict
+
+
+// Sample usage
+var m = HeterogeneousDictionary()
+print(m[LearningRate.self])
+m[LearningRate.self] = 3.4
+print(m[LearningRate.self])
+
+print(m[StepCount.self])
+m[StepCount.self] = 3
+print(m[StepCount.self])
+print(type(of: m[StepCount.self]))
+print(type(of: m[LearningRate.self]))

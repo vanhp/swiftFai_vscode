@@ -1,0 +1,240 @@
+import loadData
+import fastai_layers
+import fully_connected
+import TensorFlow
+
+
+print("hello fully_connected!")
+
+var (xTrain, yTrain, xValid, yValid) = loadMNIST(path: mnistPath, flat: true)
+
+// Normalize the training and validation sets with the training set statistics.
+let trainMean = xTrain.mean()
+let trainStd  = xTrain.std()
+print("train mean: ",trainMean)
+print("train Std: ",trainStd)
+xTrain = normalize(xTrain, mean: trainMean, std: trainStd)
+xValid = normalize(xValid, mean: trainMean, std: trainStd)
+//print("train normalize: ",xTrain)
+//print("Validation normalize: ",xValid)
+// To test everything is going well:
+testNearZero(xTrain.mean())
+
+testNearZero(xTrain.std() - 1.0)
+let (n,m) = (xTrain.shape[0],xTrain.shape[1])
+print("xTrain shape 0: \(n) shape 1: \(m)")
+let c = yTrain.max()+1
+print("yTrain max : \(c)")
+//print(n, m, c)
+// In Swift @ is spelled •, which is option-8 on Mac or compose-.-= elsewhere. 
+// Or just use the matmul() function we've seen already.
+
+//number of hidden layers
+let nh = 50
+// simplified kaiming init / he init
+let w1 = TF(randomNormal: [m, nh]) / sqrt(Float(m))
+let b1 = TF(zeros: [nh])
+let w2 = TF(randomNormal: [nh,1]) / sqrt(Float(nh))
+let b2 = TF(zeros: [1])
+
+testNearZero(w1.mean())
+testNearZero(w1.std()-1/sqrt(Float(m)))
+
+// improve version of kaiming init / he init for relu
+let kw2 = TF(randomNormal: [m,nh]) * sqrt(2.0/Float(m))
+
+// This should be ~ (0,1) (mean,std)...
+print(" validation mean: \(xValid.mean()), validation Std: \(xValid.std())")
+
+print("Kaiming v1 mean: \(w1.mean()), Kaiming v1 Std: \(w1.std())")
+print("Kaiming v2 mean: \(kw2.mean()), Kaiming v2 Std: \(kw2.std())")
+
+let ln = lin(xValid, w1, b1)
+//...so should this, because we used kaiming init, which is designed to do this
+print("Kaiming v1 linear mean: \(ln.mean()),Kaiming v1 linear Std: \(ln.std())")
+let ln2 = lin(xValid,kw2,b1)
+print("Kaiming v2 linear mean: \(ln2.mean()),Kaiming v2 linear Std: \(ln2.std())")
+
+let relu1 = myRelu(lin(xValid, w1, b1))
+print("Kaiming v1 Relu mean: \(relu1.mean()),Kaiming Relu v1 Std: \(relu1.std())")
+let relu2 = myRelu(lin(xValid, kw2, b1))
+print("Kaiming v2 Relu mean: \(relu2.mean()),Kaiming Relu v2 Std: \(relu2.std())")
+
+// Here is a simple basic model:
+func model(_ xb: TF) -> TF {
+    let l1 = lin(xb, w1, b1)
+    let l2 = myRelu(l1)
+    let l3 = lin(l2, w2, b2)
+    return l3
+}
+time(repeating: 10) { _ = model(xValid) }
+
+let preds = model(xTrain)
+
+// One more step compared to Python, 
+// we have to make sure our labels are properly converted to floats.
+// Convert these to Float dtype.
+var yTrainF = TF(yTrain)
+var yValidF = TF(yValid)
+
+// loss using mse
+print("mean square error: \(mse(preds, yTrainF))")
+
+let w1a = TFGrad(w1)
+let b1a = TFGrad(b1)
+let w2a = TFGrad(w2)
+let b2a = TFGrad(b2)
+
+func forwardAndBackward(_ inp:TFGrad, _ targ:TF){
+    // forward pass:
+    let l1 = lin(inp, w1a, b1a)
+    let l2 = myRelu(l1)
+    let out = lin(l2, w2a, b2a)
+    //we don't actually need the loss in backward!
+    let loss = mse(out, targ)
+    
+    // backward pass:
+    mseGrad(out, targ)
+    linGrad(l2, out, w2a, b2a)
+    reluGrad(l1, l2)
+    linGrad(inp, l1, w1a, b1a)
+}
+let inp = TFGrad(xTrain)
+forwardAndBackward(inp, yTrainF)
+
+let gradF = gradient { (x : Double) in x*x }
+
+for x in stride(from: 0.0, to: 1, by: 0.1) {
+  print(gradF(x))    
+}
+// Note how we're working with simple doubles here, not having to use tensors. 
+// Other than that, you can use it basically the way PyTorch autodiff works.
+// You can get the gradients of functions, and do everything else you'd expect:
+func doThing(_ x: Float) -> Float {
+    return sin(x*x) + cos(x*x)
+}
+
+print(gradient(at: 3.14, in: doThing))
+// Try out the trace helper function.
+func foo(a: Int, b: Int) -> Int {
+  trace()
+  return a+b
+}
+func bar(x: Int) -> Int {
+  trace()
+  return x*42+17
+}
+
+_ = foo(a: 1, b: 2)
+_ = bar(x: 17)
+
+let exampleData = TF([1, 2, 3, 4])
+let (mseInnerResult1, mseInnerGrad1) = mseInnerAndGrad(exampleData)
+print()
+
+print("result:", mseInnerResult1)
+print("gradient:", mseInnerGrad1)
+// Note above how square got called two times: once in 
+// the forward function and once in the gradient. In more complicated cases, 
+// this can be an incredible amount of redundant computation, 
+// which would make performance unacceptably slow.
+
+// Exercise: take a look what happens when you use the same techniques 
+// to implement more complex functions.
+
+// Check that our gradient matches builtin S4TF's autodiff.
+let builtinGrad = gradient(at: exampleData) { x in (x*x).mean() }
+testSame(mseInnerGrad1, builtinGrad)
+
+//Now we can choose to evaluate just the forward computation, or we can choose to run both:
+print("Calling the forward function:")
+let mseInner2 = mseInnerVWC(exampleData)
+print()
+
+testSame(mseInner2.value, mseInnerResult1)
+
+print("Calling the backward function:")
+let mseInnerGrad2 = mseInner2.chain(TF(1))
+print()
+
+print(mseInnerGrad2)
+// Check that we get the same result.
+testSame(mseInnerGrad2, builtinGrad)
+
+// And then our forward and backward can be refactored in:
+public func forwardAndBackward(_ inp: TF, _ targ: TF) -> (TF, TF, TF, TF, TF) {
+    // Forward pass:
+    let l1   = linVWC(inp, w1, b1)
+    let l2   = reluVWC(l1.value)
+    let out  = linVWC(l2.value, w2, b2)
+    //we don't actually need the loss in backward, but we need the pullback.
+    let loss = mseVWC(out.value, targ)
+    
+    // Backward pass:
+    let 𝛁loss = TF(1) // We don't really need it but the gradient of the loss with respect to itself is 1
+    let 𝛁out = loss.chain(𝛁loss)
+    let (𝛁l2, 𝛁w2, 𝛁b2) = out.chain(𝛁out)
+    let 𝛁l1 = l2.chain(𝛁l2)
+    let (𝛁inp, 𝛁w1, 𝛁b1) = l1.chain(𝛁l1)
+    return (𝛁inp, 𝛁w1, 𝛁b1, 𝛁w2, 𝛁b2)
+}
+
+let (𝛁xTrain, 𝛁w1, 𝛁b1, 𝛁w2, 𝛁b2) = forwardAndBackward(xTrain, yTrainF)
+// Check this is still all correct
+testSame(inp.grad, 𝛁xTrain)
+testSame(w1a.grad, 𝛁w1)
+testSame(b1a.grad, 𝛁b1)
+testSame(w2a.grad, 𝛁w2)
+testSame(b2a.grad, 𝛁b2)
+
+let mseInner𝛁Chain = pullback(at: exampleData, in: mseInnerForAD)
+print(type(of: mseInner𝛁Chain))
+let (value, grad) = valueWithGradient(at: exampleData, in: mseInnerForAD)
+
+print("value: \(value), grad:  \(grad)")
+// We can also ask for just the gradient. Of course, we can also use trailing closures, 
+// which work very nicely with these functions.
+gradient(at: exampleData) { ($0*$0).mean() }
+
+// // Let's try refactoring our single linear model to use a `struct` to simplify this.  
+// // We start by defining a structure to contain all the fields we need.  
+// // We mark the structure as `: Differentiable` so the compiler knows 
+// // we want it to be differentiable (not discrete):
+// public struct MyModel: Differentiable {
+//     public var w1, b1, w2, b2: TF
+// }
+// // We can now define our forward function as a method on this model:
+// extension MyModel {
+//     @differentiable
+//     public func forward(_ input: TF, _ target: TF) -> TF {
+//         // FIXME: use lin
+//         let l1 = matmul(input, w1) + b1
+//         let l2 = relu(l1)
+//         let l3 = matmul(l2, w2) + b2
+//         // use mse
+//         return (l3.squeezingShape(at: -1) - target).squared().mean()
+//     }
+// }
+// // Given this, we can now get the gradient of our entire loss w.r.t 
+// // to the input and the expected labels:
+
+
+// Create an instance of our model with all the individual parameters we initialized.
+//let model = MyModel(w1: w1, b1: b1, w2: w2, b2: b2)
+let model = MyModel(w1, b1, w2, b2)
+// Grads is a struct with one gradient per parameter.
+let grads = gradient(at: model) { model in model.forward(xTrain, yTrainF) }
+
+// Check that this still calculates the same thing.
+testSame(𝛁w1, grads.w1)
+testSame(𝛁b1, grads.b1)
+testSame(𝛁w2, grads.w2)
+testSame(𝛁b2, grads.b2)
+// In terms of timing our implementation gives:
+time(repeating: 10) { _ = forwardAndBackward(xTrain, yTrainF) }
+time(repeating: 10) {
+    _ = valueWithGradient(at: model) { 
+        model in model.forward(xTrain, yTrainF)
+    }
+}
+

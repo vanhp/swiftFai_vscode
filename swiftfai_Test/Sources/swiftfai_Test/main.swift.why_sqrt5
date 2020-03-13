@@ -1,0 +1,82 @@
+
+import Foundation
+import TensorFlow
+import fully_connected
+import Path
+import loadData
+import fastai_layers
+import why_sqrt5
+
+var (xTrain, yTrain, xValid, yValid) = loadMNIST(path: Path.home/".fastai"/"data"/"mnist_tst")
+let (trainMean, trainStd) = (xTrain.mean(), xTrain.standardDeviation())
+xTrain = normalize(xTrain, mean: trainMean, std: trainStd)
+xValid = normalize(xValid, mean: trainMean, std: trainStd)
+xTrain = xTrain.reshaped(to: [xTrain.shape[0], 28, 28, 1])
+xValid = xValid.reshaped(to: [xValid.shape[0], 28, 28, 1])
+print(xTrain.shape, xValid.shape)
+let images = xTrain.shape[0]
+let classes = xValid.max() + 1
+let channels = 32
+var layer1 = FAConv2D<Float>(filterShape: (5, 5, 1, channels)) //Conv2D(1, nh, 5)
+let x = xValid[0..<100]
+print("validation shape: \(x.shape)")
+print("layer filter: \((filter: layer1.filter.stats(), bias: layer1.bias.stats()))")
+
+withDevice(.cpu){
+    //let result = layer1(x)
+    _ = layer1(x)
+}
+let result = layer1(x)
+print("stat: \(result.stats())")
+
+layer1.filter = Tensor(kaimingNormal: layer1.filter.shape, negativeSlope: 1.0)
+
+print("layer1 stat: \(layer1(x).stats())")
+
+layer1.filter = Tensor(kaimingNormal: layer1.filter.shape, negativeSlope: 0.0)
+print("why_sqrt5.leakyRelu(layer1(x)).stats()")
+
+
+var layer2 = FAConv2D<Float>(filterShape: (5, 5, 1, channels)) //Conv2D(1, nh, 5)
+print("why_sqrt5.leakyRelu(layer2(x)).stats()")
+print("layer2 filter: \(layer2.filter.shape)")
+let spatialDimCount = layer2.filter.rank - 2
+let receptiveField = layer2.filter.shape[0..<spatialDimCount].contiguousSize
+print("receptive field: \(receptiveField)")
+
+let filtersIn = layer2.filter.shape[2]
+let filtersOut = layer2.filter.shape[3]
+print("filter: ",filtersIn, filtersOut)
+
+let fanIn = filtersIn * receptiveField
+let fanOut = filtersOut * receptiveField
+print("fan: ",fanIn, fanOut)
+print("(gain(1.0), gain(0.0), gain(0.01), gain(0.1), gain(sqrt(5.0)))")
+print("(2 * Tensor<Float>(randomUniform: [10000]) - 1).standardDeviation()")
+print("1.0 / sqrt(3.0)")
+layer2.filter = Tensor(kaimingUniform: layer2.filter.shape, negativeSlope: 0.0)
+print("why_sqrt5.leakyRelu(layer2(x)).stats()")
+layer2.filter = Tensor(kaimingUniform: layer2.filter.shape, negativeSlope: sqrt(5.0))
+print("why_sqrt5.leakyRelu(layer2(x)).stats()")
+
+let y = Tensor<Float>(yValid[0..<100])
+var model = Model()
+let prediction = model(x)
+print("prediction.stats()")
+let gradients = gradient(at: model) { model in
+    meanSquaredError(predicted: model(x), expected: y)
+}
+
+print("gradients.conv1.filter.stats()")
+
+for keyPath in [\Model.conv1, \Model.conv2, \Model.conv3, \Model.conv4] {
+    model[keyPath: keyPath].filter = Tensor(kaimingUniform: model[keyPath: keyPath].filter.shape)
+}
+let prediction2 = model(x)
+print("prediction2.stats()")
+
+let gradients2 = gradient(at: model) { model in
+    meanSquaredError(predicted: model(x), expected: y)
+}
+
+print("gradients2.conv1.filter.stats()")

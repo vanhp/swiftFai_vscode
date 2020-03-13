@@ -1,0 +1,43 @@
+import batchnorm
+
+import cuda
+import callbacks
+import TensorFlow
+
+import loadData
+import fastai_layers
+import fully_connected
+import minibatch_training
+import annealing
+import early_stoping
+
+import Python
+
+let plt = Python.import("matplotlib.pyplot")
+
+let data = mnistDataBunch(flat: false, bs: 512)
+
+func optFunc(_ model: CnnModel) -> SGD<CnnModel> { return SGD(for: model, learningRate: 0.4) }
+func modelInit() -> CnnModel { return CnnModel(channelIn: 1, nOut: 10, filters: [8, 16, 32, 32]) }
+
+let learner = Learner(data: data, lossFunc: crossEntropy, optFunc: optFunc, modelInit: modelInit)
+let recorder = learner.makeDefaultDelegates(metrics: [accuracy])
+learner.addDelegates([learner.makeNormalize(mean: mnistStats.mean, std: mnistStats.std),
+                      learner.makeAddChannel()])
+
+time { try! learner.fit(1) }
+// Epoch 0: [0.48366967, 0.8508]                                                  
+// average: 4363.407761 ms,   min: 4363.407761 ms,   max: 4363.407761 ms   
+
+func optFunc2(_ model: CnnModelBN) -> SGD<CnnModelBN> { return SGD(for: model, learningRate: 0.4) }
+func modelInit2() -> CnnModelBN { return CnnModelBN(channelIn: 1, nOut: 10, filters: [8, 16, 32, 32]) }
+let learner2 = Learner(data: data, lossFunc: crossEntropy, optFunc: optFunc2, modelInit: modelInit2)
+let recorder2 = learner.makeDefaultDelegates(metrics: [accuracy])
+learner2.addDelegates([learner2.makeNormalize(mean: mnistStats.mean, std: mnistStats.std),
+                      learner2.makeAddChannel()])
+
+
+time { try! learner2.fit(1) }
+// Epoch 0: [0.43467557, 0.8661]                                                  
+// average: 4204.886202 ms,   min: 4204.886202 ms,   max: 4204.886202 ms         
+// average: 1557.376271 ms,   min: 1557.376271 ms,   max: 1557.376271 ms

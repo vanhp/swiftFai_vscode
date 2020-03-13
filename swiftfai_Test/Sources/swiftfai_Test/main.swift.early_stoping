@@ -1,0 +1,69 @@
+import early_stoping
+import TensorFlow
+import annealing
+
+import callbacks
+ //import good_init
+import minibatch_training
+
+ import Python
+ let plt = Python.import("matplotlib.pyplot")
+
+
+let data = mnistDataBunch(flat: true)
+
+let (n,m) = (60000,784)
+let c = 10
+let nHid = 50
+
+func modelInit() -> BasicModel {return BasicModel(nIn: m, nHid: nHid, nOut: c)}
+
+var learner = Learner(data: data, lossFunc: crossEntropy, optFunc: optFunc, modelInit: modelInit)
+var recorder = learner.makeRecorder()
+// Check the previous callbacks load.
+learner.delegates = [learner.makeTrainEvalDelegate(), 
+                     learner.makeShowProgress(),
+                     learner.makeNormalize(mean: mnistStats.mean, std: mnistStats.std),
+                     learner.makeAvgMetric(metrics: [accuracy]), recorder]
+try learner.fit(2)         
+// Epoch 0: [0.30406752, 0.9146]                                                  
+// Epoch 1: [0.25269088, 0.9268] 
+recorder.plotLosses()
+ 
+// testing control flow and event
+learner = Learner(data: data, lossFunc: crossEntropy, optFunc: optFunc, modelInit: modelInit)
+learner.delegates = [type(of: learner).TestControlFlow(skipAfter:5, stopAfter: 8),
+                     learner.makeTrainEvalDelegate()]
+
+try learner.fit(5)
+// batchWillStart
+// batchWillStart
+// batchWillStart
+// batchWillStart
+// batchWillStart
+// batchWillStart
+// *** skipBatch: 5
+// batchWillStart
+// *** skipBatch: 6
+// batchWillStart
+// *** skipBatch: 7
+// batchWillStart
+// trainingDidFinish
+
+// Check if the orders were taken into account:
+print((learner.delegates[0].order,learner.delegates[1].order))
+//(0, 3)
+
+learner = Learner(data: data, lossFunc: crossEntropy, optFunc: optFunc, modelInit: modelInit)
+recorder = learner.makeDefaultDelegates()
+
+learner.delegates.append(learner.makeNormalize(mean: mnistStats.mean, std: mnistStats.std))
+learner.delegates.append(learner.makeLRFinder())
+try learner.fit(2)
+recorder.plotLRFinder()
+recorder = learner.lrFind()
+recorder.plotLRFinder()
+
+// import NotebookExport
+// let exporter = NotebookExport(Path.cwd/"05b_early_stopping.ipynb")
+// print(exporter.export(usingPrefix: "FastaiNotebook_"))

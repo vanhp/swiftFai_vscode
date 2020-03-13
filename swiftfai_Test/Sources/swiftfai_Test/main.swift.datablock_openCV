@@ -1,0 +1,40 @@
+// import datablock_openCV
+// import Path
+
+// //export
+// // import SwiftCV
+// import Foundation
+
+
+// //  Download Imagenette
+// // First things first, we need to download Imagenette and untar it. 
+// // What follows is very close to what we did for MNIST.
+
+// let path = downloadImagenette()
+
+// // If we look at path.ls(), we see it returns a list of entries, 
+// // which are structures with a kind and a path attribute. 
+// // The kind is an enum that can be file or directory. 
+// // path then points to the corresponding location.
+
+// for e in try path.ls() { print("\(e.path) (\(e.kind == .directory ? "directory": "file"))")}
+// for e in try (path/"val").ls() { print("\(e.path) (\(e.kind == .directory ? "directory": "file"))")}
+
+// // Let's have a look inside a class folder (the first class is tench):
+// let pathTench = path/"val"/"n01440764"
+// let imgFn = Path.home/".fastai/data/imagenette-160/val/n01440764/ILSVRC2012_val_00006697.JPEG"
+// print("Jpeg image file: ",imgFn.string)
+
+// //load the image in memory
+// let imgContent = try Data(contentsOf: imgFn.url)
+// // make opencv image
+// var cvImg = imdecode(imgContent)
+// // convert to RGB
+// cvImg = cvtColor(cvImg, nil, ColorConversionCode.COLOR_BGR2RGB)
+
+// // By converting this image to a tensor then numpy, we can use plt to plot it:
+// let tensImg = Tensor<UInt8>(cvMat: cvImg)!
+// let numpyImg = tensImg.makeNumpyArray()
+// plt.imshow(numpyImg) 
+// plt.axis("off")
+// plt.show()

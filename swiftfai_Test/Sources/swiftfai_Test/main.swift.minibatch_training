@@ -1,0 +1,158 @@
+import TensorFlow
+import loadData
+import minibatch_training
+import Path
+import fastai_layers
+import fully_connected
+
+// get data
+var (xTrain,yTrain,xValid,yValid) = loadMNIST(path: Path.home/".fastai"/"data"/"mnist_tst", flat: true)
+let trainMean = xTrain.mean()
+let trainStd  = xTrain.std()
+xTrain = normalize(xTrain, mean: trainMean, std: trainStd)
+xValid = normalize(xValid, mean: trainMean, std: trainStd)
+let (n,m) = (xTrain.shape[0],xTrain.shape[1])
+let c = yTrain.max().scalarized()+1
+print(n,m,c)
+// 60000 784 10
+
+// We also define a simple model using our FADense layers.
+let nHid = 50
+var model = MyModel(nIn: m, nHid: nHid, nOut: Int(c))
+let pred = model(xTrain)
+let smPred = minibatch_training.logSoftmax(pred)
+print("yTrain: \(yTrain[0..<3])") 
+//yTrain: [5, 0, 4]
+print("soft max prediction: \((smPred[0][5],smPred[1][0],smPred[2][4]))")
+//soft max prediction: (-2.938412, -2.7747297, -1.954384)
+
+// There is no fancy indexing yet so we have to use gather to get the indices 
+// we want out of our softmaxed predictions.
+print("negative log likelyhood1 prediction: \(nll(smPred, yTrain))")
+// negative log likelyhood1 prediction: 2.4499772
+time(repeating: 100){ let _ = nll(smPred, yTrain) }
+//average: 1.3795885500000005 ms,   min: 0.626742 ms,   max: 3.181202 ms
+
+let smPred2 = minibatch_training.logSoftmax_V2(pred)
+print("negative log likelyhood2 prediction: \(nll(smPred2, yTrain))")
+// negative log likelyhood2 prediction: 2.4499772
+print("Tensor shape: \(smPred2.max(alongAxes: -1).shape)")
+// Tensor shape: [60000, 1]
+let smPred3 = logSoftmax_SumExp(pred)
+print("negative log likelyhood3 prediction: \(nll(smPred3, yTrain))")
+// negative log likelyhood3 prediction: 2.4499772
+
+// In S4TF nll loss is combined with softmax in:
+let loss = softmaxCrossEntropy(logits: pred, labels: yTrain)
+print("loss function: \(loss)")
+// loss function: 2.3610098
+time(repeating: 100){ _ = nll(logSoftmax_SumExp(pred), yTrain)}
+// average: 3.1829729400000013 ms,   min: 1.582379 ms,   max: 13.431907 ms
+time(repeating: 100){ _ = softmaxCrossEntropy(logits: pred, labels: yTrain)}
+// average: 2.740042839999999 ms,   min: 2.119068 ms,   max: 8.270164 ms
+
+//We have a raw model for now, so it should be as good as random: 10% accuracy.
+print("accuracy: ",accuracy(pred, yTrain))
+// accuracy:  0.056466665
+
+//So let's begin with a minibatch.
+let bs=64                     // batch size
+let xb = xTrain[0..<bs]       // a mini-batch from x
+let preds = model(xb)         // predictions
+print("prediction: \(preds[0])", "shape: \(preds.shape)")
+// prediction: [ 0.21601798,  -0.6601436,  0.54182243, -0.23346901,  0.13122977,  -1.2711003,  0.10548125,
+//  -0.08147269,  -0.5627253,   0.7420489] shape: [64, 10]
+
+// Then we can compute a loss
+let yb = yTrain[0..<bs]
+let loss2 = softmaxCrossEntropy(logits: preds, labels: yb)
+print("accuracy: ",accuracy(preds, yb))
+// accuracy:  0.0625
+let lr:Float = 0.5   // learning rate
+let epochs = 1       // how many epochs to train for
+
+// Then we can get our loss and gradients.
+// Sometimes you'll see closures written this way (required if there is >1 statement in it).
+let (loss3, grads) = model.valueWithGradient { model -> TF in
+    let preds = model(xb)
+    return softmaxCrossEntropy(logits: preds, labels: yb)
+}
+// The full loop by hand would look like this:
+for epoch in 1 ... epochs {
+    for i in 0 ..< (n-1)/bs {
+        let startIdx = i * bs
+        let endIdx = startIdx + bs
+        let xb = xTrain[startIdx..<endIdx]
+        let yb = yTrain[startIdx..<endIdx]
+        let (loss, grads) = model.valueWithGradient {
+            softmaxCrossEntropy(logits: $0(xb), labels: yb)
+        }
+        model.layer1.weight -= lr * grads.layer1.weight
+        model.layer1.bias   -= lr * grads.layer1.bias
+        model.layer2.weight -= lr * grads.layer2.weight
+        model.layer2.bias   -= lr * grads.layer2.bias
+    }
+}
+let preds2 = model(xValid)
+print("accuracy: ",accuracy(preds2, yValid))
+// accuracy:  0.8817
+// >80% in one epoch, not too bad!
+
+// When we get the gradients of our model, we have another structure of the same type,
+//  and it's possible to perform basic arithmetic on 
+// those structures to make the update step super simple:
+for epoch in 1 ... epochs {
+    for i in 0 ..< (n-1)/bs {
+        let startIdx = i * bs
+        let endIdx = startIdx + bs
+        let xb = xTrain[startIdx..<endIdx]
+        let yb = yTrain[startIdx..<endIdx]
+        let (loss, grads) = model.valueWithGradient {
+            softmaxCrossEntropy(logits: $0(xb), labels: yb)
+        }
+        model.move(along: grads.scaled(by: -lr))
+    }
+}
+// Then we can use a S4TF optimizer to do the step for us 
+// (which doesn't win much just yet - but will be nice when we can use momentum, adam, etc). 
+// An optimizer takes a Layer object and some gradients, and will perform the update.
+let optimizer = SGD(for: model, learningRate: lr)
+
+for epoch in 1 ... epochs{
+    for b in batchedRanges(start: 0, end: n, bs: bs) {
+        let (xb,yb) = (xTrain[b],yTrain[b])
+        let (loss, grads) = model.valueWithGradient {
+            softmaxCrossEntropy(logits: $0(xb), labels: yb)
+        }
+        optimizer.update(&model, along: grads)
+    }
+}
+
+let trainDs = Dataset(elements:DataBatch(xb:xTrain, yb:yTrain)).batched(bs)
+
+for epoch in 1...epochs{
+    for batch in trainDs {
+        let (loss, grads) = model.valueWithGradient {
+            softmaxCrossEntropy(logits: $0(xb), labels: yb)
+        }
+        optimizer.update(&model, along: grads)
+    }
+}
+// This Dataset can also do the shuffle for us:
+for epoch in 1...epochs{
+    for batch in trainDs.shuffled(sampleCount: yTrain.shape[0], randomSeed: 42){
+        let (loss, grads) = model.valueWithGradient {
+            softmaxCrossEntropy(logits: $0(xb), labels: yb)
+        }
+        optimizer.update(&model, along: grads)
+    }
+}
+
+var model2 = MyModel(nIn: m, nHid: nHid, nOut: Int(c))
+var optimizer2 = SGD(for: model2, learningRate: lr)
+
+train(&model2, on: trainDs, using: &optimizer2, lossFunc: crossEntropy)
+
+let preds3 = model(xValid)
+print("accuracy: ",accuracy(preds3, yValid))
+// accuracy:  0.9166

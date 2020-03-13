@@ -1,0 +1,8 @@
+version: "Swift version 5.2-dev (Swift 91082d565a)"
+options: "bd5f5a04afd426f07b2e7d832f55519f"
+build_time: [1580429582, 948389346]
+inputs:
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/NotebookExport/Sources/NotebookExport/DependencyDescription.swift": [1580429569, 984022215]
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/NotebookExport/Sources/NotebookExport/ExtensionUtils.swift": [1580429569, 984022215]
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/NotebookExport/Sources/NotebookExport/NotebookExport.swift": [1580429569, 984022215]
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/NotebookExport/Sources/NotebookExport/PackageManifest.swift": [1580429569, 984022215]

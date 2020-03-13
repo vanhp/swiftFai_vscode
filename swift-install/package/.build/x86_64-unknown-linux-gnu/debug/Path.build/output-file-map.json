@@ -1,0 +1,59 @@
+{
+  "": {
+    "swift-dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/master.swiftdeps"
+  },
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/Path.swift/Sources/Extensions.swift": {
+    "dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Extensions.d",
+    "object": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Extensions.swift.o",
+    "swiftmodule": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Extensions~partial.swiftmodule",
+    "swift-dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Extensions.swiftdeps"
+  },
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/Path.swift/Sources/Path+Attributes.swift": {
+    "dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+Attributes.d",
+    "object": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+Attributes.swift.o",
+    "swiftmodule": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+Attributes~partial.swiftmodule",
+    "swift-dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+Attributes.swiftdeps"
+  },
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/Path.swift/Sources/Path+Codable.swift": {
+    "dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+Codable.d",
+    "object": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+Codable.swift.o",
+    "swiftmodule": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+Codable~partial.swiftmodule",
+    "swift-dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+Codable.swiftdeps"
+  },
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/Path.swift/Sources/Path+CommonDirectories.swift": {
+    "dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+CommonDirectories.d",
+    "object": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+CommonDirectories.swift.o",
+    "swiftmodule": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+CommonDirectories~partial.swiftmodule",
+    "swift-dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+CommonDirectories.swiftdeps"
+  },
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/Path.swift/Sources/Path+FileManager.swift": {
+    "dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+FileManager.d",
+    "object": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+FileManager.swift.o",
+    "swiftmodule": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+FileManager~partial.swiftmodule",
+    "swift-dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+FileManager.swiftdeps"
+  },
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/Path.swift/Sources/Path+StringConvertibles.swift": {
+    "dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+StringConvertibles.d",
+    "object": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+StringConvertibles.swift.o",
+    "swiftmodule": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+StringConvertibles~partial.swiftmodule",
+    "swift-dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+StringConvertibles.swiftdeps"
+  },
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/Path.swift/Sources/Path+ls.swift": {
+    "dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+ls.d",
+    "object": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+ls.swift.o",
+    "swiftmodule": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+ls~partial.swiftmodule",
+    "swift-dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path+ls.swiftdeps"
+  },
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/Path.swift/Sources/Path->Bool.swift": {
+    "dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path->Bool.d",
+    "object": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path->Bool.swift.o",
+    "swiftmodule": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path->Bool~partial.swiftmodule",
+    "swift-dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path->Bool.swiftdeps"
+  },
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/Path.swift/Sources/Path.swift": {
+    "dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path.d",
+    "object": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path.swift.o",
+    "swiftmodule": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path~partial.swiftmodule",
+    "swift-dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Path.build/Path.swiftdeps"
+  }
+}

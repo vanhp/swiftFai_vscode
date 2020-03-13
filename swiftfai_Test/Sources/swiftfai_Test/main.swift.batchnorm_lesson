@@ -1,0 +1,57 @@
+import TensorFlow
+import batchnorm_lesson
+import fastai_layers
+import fully_connected
+
+
+// let input = TF(randomUniform: [64, 28, 28, 32])
+// let norm = FABatchNorm(32)
+// let pb = pullback(at: input) { x in norm(x) }
+// benchmark(forward: { norm(input) }, backward: { pb(input) })
+// let input = TF(randomUniform: [64, 28, 28, 32])
+// let norm = FABatchNorm(32)
+// let pb = pullback(at: input) { x in norm(x) }
+// benchmark(forward: { norm(input) }, backward: { pb(input) })
+
+// Yikes, that's pretty bad. Luckily, TensorFlow has a built-in fused batchnorm layer. 
+// Let's see how the performance looks for that:
+let input = TF(randomUniform: [64, 28, 28, 32])
+let norm = FABatchNorm(32)
+// let bnresult = _Raw.fusedBatchNormV2(
+//     input, scale: norm.scale, offset: norm.offset, 
+//     mean: TF([] as [Float]), variance: TF([] as [Float]), 
+//     epsilon: Double(norm.epsilon))
+//     benchmark(
+//     forward: {
+//         _Raw.fusedBatchNormV2(
+//             input, scale: norm.scale, offset: norm.offset, 
+//             mean: TF([] as [Float]), variance: TF([] as [Float]), 
+//             epsilon: Double(norm.epsilon))
+//     },
+//     backward: {
+//         _Raw.fusedBatchNormGradV2(
+//             yBackprop: input, input, scale: TF(norm.scale), 
+//             reserveSpace1: bnresult.reserveSpace1, 
+//             reserveSpace2: bnresult.reserveSpace2, 
+//             epsilon: Double(norm.epsilon))
+//     })
+
+
+let input = TF(randomUniform: [64, 28, 28, 32])
+let norm = FABatchNorm(32)
+let compiledTrainingKernel = xlaCompiled(trainingKernel)
+let kernelInput = TrainingKernelInput(
+    input: input,
+    scale: norm.scale,
+    offset: norm.offset,
+    runningMean: norm.runningMean.value,
+    runningVariance: norm.runningVariance.value,
+    momentum: Tensor(norm.momentum),
+    epsilon: Tensor(norm.epsilon))
+let pb = pullback(at: kernelInput) { x in compiledTrainingKernel.f(x) }
+let kernelOutput = compiledTrainingKernel.f(kernelInput)
+
+benchmark(
+    forward: { compiledTrainingKernel.f(kernelInput) },
+    backward: { pb(kernelOutput) })
+    

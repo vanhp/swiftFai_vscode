@@ -1,0 +1,11 @@
+{
+  "": {
+    "swift-dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Just.build/master.swiftdeps"
+  },
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/Just/Sources/Just/Just.swift": {
+    "dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Just.build/Just.d",
+    "object": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Just.build/Just.swift.o",
+    "swiftmodule": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Just.build/Just~partial.swiftmodule",
+    "swift-dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/Just.build/Just.swiftdeps"
+  }
+}

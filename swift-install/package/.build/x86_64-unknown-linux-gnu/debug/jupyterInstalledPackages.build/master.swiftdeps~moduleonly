@@ -1,0 +1,5 @@
+version: "Swift version 5.2-dev (Swift 91082d565a)"
+options: "35130f959992e5a63dc2b583fe1c49b9"
+build_time: [1580429584, 248740097]
+inputs:
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/jupyterInstalledPackages.swift": [1580429564, 303937194]

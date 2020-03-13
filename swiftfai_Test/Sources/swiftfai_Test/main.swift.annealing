@@ -1,0 +1,116 @@
+import TensorFlow
+import annealing
+
+// %include "EnableIPythonDisplay.swift"
+// IPythonDisplay.shell.enable_matplotlib("inline")
+
+import callbacks
+ //import good_init
+ import minibatch_training
+
+ import Python
+ let plt = Python.import("matplotlib.pyplot")
+
+
+let data = mnistDataBunch(flat: true)
+let (n,m) = (60000,784)
+let c = 10
+let nHid = 50
+
+func modelInit() -> BasicModel {return BasicModel(nIn: m, nHid: nHid, nOut: c)}
+
+let learner = Learner(data: data, lossFunc: crossEntropy, optFunc: optFunc, modelInit: modelInit)
+learner.delegates = [learner.makeTrainEvalDelegate(), learner.makeAvgMetric(metrics: [accuracy]),
+                     learner.makeNormalize(mean: mnistStats.mean, std: mnistStats.std)]
+
+try learner.fit(2)
+// Epoch 0: [0.30226478, 0.9135]
+// Epoch 1: [0.2504728, 0.9275]
+
+let learner2 = Learner(data: data, lossFunc: crossEntropy, optFunc: optFunc, modelInit: modelInit)
+
+// // Utility optional property to get backour Recorder if it was created by a utility function. 
+// // // This doesn't always work properly for unknown reasons
+// // //TODO: Fix
+// extension Learner where Opt.Scalar: PythonConvertible{
+//     public var recorder: Learner.Recorder? {
+//         for callback in learner3.delegates {
+//             if let recorder = callback as? Learner.Recorder { return recorder }
+//         }
+//         return nil
+//     }
+// }
+
+// using the recorder to keep track of the loss and schedule learning rate
+learner2.delegates = [learner2.makeTrainEvalDelegate(), learner2.makeAvgMetric(metrics: [accuracy]), 
+                     learner2.makeNormalize(mean: mnistStats.mean, 
+                     std: mnistStats.std), learner2.makeRecorder()]
+
+try learner2.fit(2)
+// Epoch 0: [0.21644336, 0.9384]
+// Epoch 1: [0.196665, 0.9426]
+
+learner2.recorder!.plotLosses()
+// annealing.Plotdamping()
+print(formatTime(78.23))
+var tst = ProgressBar(100)
+for i in 0...100{
+    tst.update(i)
+    usleep(50000)
+}
+tst.remove()
+
+// using progressbar
+let learner3 = Learner(data: data, lossFunc: crossEntropy, optFunc: optFunc, modelInit: modelInit)
+learner3.delegates = [learner3.makeTrainEvalDelegate(), learner3.makeShowProgress(), 
+                     learner3.makeAvgMetric(metrics: [accuracy]), learner3.makeRecorder(),
+                     learner3.makeNormalize(mean: mnistStats.mean, std: mnistStats.std)]
+
+// Utility optional property to get backour Recorder if it was created by a utility function. 
+ // This doesn't always work properly for unknown reasons
+ // //TODO: Fix
+ // only learner2 work but learner,learner3 crash
+extension Learner where Opt.Scalar: PythonConvertible{
+    public var recorder: Learner.Recorder? {
+        for callback in learner2.delegates {
+            if let recorder = callback as? Learner.Recorder { return recorder }
+        }
+        return nil
+    }
+}
+
+
+try learner3.fit(2)                   
+learner3.recorder!.plotLosses()
+
+let annealer = makeAnnealer(start: 1e-2, end: 0.1, schedule: linearSchedule)
+print("annealer: ",annealer(0.3))
+//annealer:  0.037
+
+let learner4 = Learner(data: data, lossFunc: crossEntropy, optFunc: optFunc, modelInit: modelInit)
+let recorder = learner4.makeRecorder()
+
+learner4.delegates = [learner4.makeTrainEvalDelegate(), 
+                      learner4.makeShowProgress(), 
+                      learner4.makeAvgMetric(metrics: [accuracy]), recorder,
+                      learner4.makeNormalize(mean: mnistStats.mean, std: mnistStats.std),
+                      learner4.makeLRScheduler(scheduler: annealer)]
+
+try learner4.fit(2)
+recorder.plotLRs()
+
+let mySchedule = combineSchedules(pcts: [0.3, 0.7], 
+                                  schedules: [makeAnnealer(start: 0.3, end: 0.6, schedule: cosineSchedule),
+                                              makeAnnealer(start: 0.6, end: 0.2, schedule: cosineSchedule)])
+
+let learner5 = Learner(data: data, lossFunc: crossEntropy, optFunc: optFunc, modelInit: modelInit)
+let recorder2 = learner5.makeRecorder()
+
+learner5.delegates = [learner5.makeTrainEvalDelegate(), 
+                     learner5.makeShowProgress(), 
+                     learner5.makeAvgMetric(metrics: [accuracy]), recorder2,
+                     learner5.makeNormalize(mean: mnistStats.mean, std: mnistStats.std),
+                     learner5.makeLRScheduler(scheduler: mySchedule)]
+
+try learner5.fit(2)          
+recorder2.plotLRs()

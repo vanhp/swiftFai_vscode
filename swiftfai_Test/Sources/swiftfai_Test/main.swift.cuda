@@ -1,0 +1,104 @@
+import cuda
+import callbacks
+import TensorFlow
+
+import loadData
+import fastai_layers
+import fully_connected
+import minibatch_training
+import annealing
+import early_stoping
+
+import Python
+
+let plt = Python.import("matplotlib.pyplot")
+
+let data = mnistDataBunch(flat: false, bs: 512)
+let firstBatch = data.train.ds.first(where: { _ in true })!
+let batchShape = firstBatch.xb.shape
+let batchSize = batchShape.dimensions[0]
+let exampleSideSize = batchShape.dimensions[1]
+assert(exampleSideSize == batchShape.dimensions[2])
+print("Batch size: \(batchSize)")
+//Batch size: 512
+print("Example side size: \(exampleSideSize)")
+//Example side size: 28
+
+let classCount = firstBatch.yb.shape.dimensions[0]
+print("Class count: \(classCount)")
+// Class count: 512
+
+print("first batch shape: ",firstBatch.xb.shape)
+//first batch shape:  [512, 28, 28]
+
+let model = CnnModel(channelIn: 1, nOut: 10, filters: [8, 16, 32, 32])
+// Test that data goes through the model as expected.
+let predictions = model(firstBatch.xb.expandingShape(at: -1))
+print(predictions.shape)
+// [512, 10]
+print(predictions[0])
+// [   0.1480508,  0.030315839, -0.043820623,  -0.10229216, -0.023220818, 0.0067690765,
+// 0.2839819,      0.14365, -0.107193865,   0.09518501]
+
+// 2  Compare training on CPU and GPU
+func optFunc(_ model: CnnModel) -> SGD<CnnModel> { return SGD(for: model, learningRate: 0.4)}
+func modelInit() -> CnnModel { return CnnModel(channelIn: 1, nOut: 10, filters: [8, 16, 32, 32]) }
+var learner = Learner(data: data, lossFunc: crossEntropy, optFunc: optFunc, modelInit: modelInit)
+var recorder = learner.makeDefaultDelegates(metrics: [accuracy])
+learner.addDelegates([learner.makeNormalize(mean: mnistStats.mean, std: mnistStats.std),
+                      learner.makeAddChannel()])
+
+// This happens on the GPU (if you have one and it's configured correctly).
+// I tried this on a GCE 8vCPU 30GB + Tesla P100:
+// - time: ~4.3s
+// - nvidia-smi shows ~10% GPU-Util while this is running
+time { try! learner.fit(1) }
+// Epoch 0: [0.8226502, 0.7323]                                                   
+// average: 5845.997097 ms,   min: 5845.997097 ms,   max: 5845.997097 ms      
+
+// This happens on the CPU.
+// I tried this on a GCE 8vCPU 30GB + Tesla P100:
+// - time: ~6.3s
+// - nvidia-smi shows 0% GPU-Util while this is running
+time {
+    withDevice(.cpu) { try! learner.fit(1) }
+}
+// Epoch 0: [0.4165039, 0.8762]                                                   
+// average: 4084.47485 ms,   min: 4084.47485 ms,   max: 4084.47485 ms         
+
+learner = Learner(data: data, lossFunc: crossEntropy, optFunc: optFunc, modelInit: modelInit)
+recorder = learner.makeDefaultDelegates(metrics: [accuracy])
+learner.addDelegates([learner.makeNormalize(mean: mnistStats.mean, std: mnistStats.std),
+                      learner.makeAddChannel()])
+
+var statHooks: [ActivationStatsHook] = (0..<learner.model.convs.count).map { i in 
+    let stat = ActivationStatsHook()
+    learner.model.convs[i].addDelegate(stat.update)
+    return stat
+}
+
+// This LayerDelegate stuff slows it down to ~6s/epoch.
+time { try! learner.fit(2) }
+// Epoch 0: [0.4258335, 0.8716]                                                   
+// Epoch 1: [0.3428562, 0.8966]                                                   
+// average: 11064.878601 ms,   min: 11064.878601 ms,   max: 11064.878601 ms    
+
+// plotting mean
+for stat in statHooks {
+    plt.plot(stat.means)
+}
+plt.legend(Array(1...statHooks.count))
+plt.title("Layer Activation Mean")
+plt.xlabel("counts")
+plt.ylabel("value")
+plt.show()
+
+// plotting standard diviation
+for stat in statHooks {
+    plt.plot(stat.stds)
+}
+plt.title("Layer Activation Std")
+plt.xlabel("counts")
+plt.ylabel("value")
+plt.legend(Array(1...statHooks.count))
+plt.show()

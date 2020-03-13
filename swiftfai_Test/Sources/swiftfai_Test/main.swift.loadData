@@ -1,0 +1,28 @@
+
+import loadData
+import Just
+import Path
+import TensorFlow
+
+
+print("Hello, loadData!")
+print("/bin/ls".shell("-lh"))
+//downloadFile("https://storage.googleapis.com/cvdf-datasets/mnist/train-images-idx3-ubyte.gz")
+
+//We will store mnist in this folder so that we don't download it each time we run a notebook:
+//export
+public let mnistPath = Path.home/".fastai"/"data"/"mnist_tst"
+//The default returns mnist in the image format:
+let (xTrain, yTrain, xValid, yValid) = loadMNIST(path: mnistPath)
+print(xTrain.shape)
+
+// time(repeating: 10) {
+//    // _ = loadMNIST(training: false, labels: false, path: mnistPath, flat: false) as Tensor<Float>
+//    _ = loadMNIST(path: mnistPath)
+// }
+
+// notebookToScript(fname: Path.cwd/"loadData.swift")
+
+// import NotebookExport
+// let exporter = NotebookExport(Path.cwd/"loadData")
+// print(exporter.export(usingPrefix: "FastaiNotebook_"))

@@ -1,0 +1,23 @@
+{
+  "allExecutables" : [
+    
+  ],
+  "builtTestProducts" : [
+    
+  ],
+  "copyCommands" : {
+    
+  },
+  "rootExecutables" : [
+    
+  ],
+  "swiftTargetMap" : {
+    "C.jupyterInstalledPackages-debug.module" : "jupyterInstalledPackages",
+    "C.Just-debug.module" : "Just",
+    "C.NotebookExport-debug.module" : "NotebookExport",
+    "C.Path-debug.module" : "Path"
+  },
+  "testDiscoveryCommands" : {
+    
+  }
+}

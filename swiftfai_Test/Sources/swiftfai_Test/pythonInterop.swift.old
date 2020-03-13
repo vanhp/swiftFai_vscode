@@ -1,0 +1,161 @@
+//////////////////////////////////////////////////////////
+// Python interop
+
+import Python
+import TensorFlow
+
+// Convert standard Swift types to Python.
+let pythonInt: PythonObject = 1
+let pythonFloat: PythonObject = 3.0
+let pythonString: PythonObject = "Hello Python!"
+let pythonRange: PythonObject = PythonObject(5..<10)
+let pythonArray: PythonObject = [1, 2, 3, 4]
+let pythonDict: PythonObject = ["foo": [0], "bar": [1, 2, 3]]
+
+// Perform standard operations on Python objects.
+print(pythonInt + pythonFloat)
+print(pythonString[0..<6])
+print(pythonString)
+print(pythonRange)
+print(pythonArray[2])
+print(pythonDict["bar"])
+// 4.0
+// Hello 
+// Hello Python!
+// slice(5, 10, None)
+// 3
+// [1, 2, 3]
+
+
+let one: PythonObject = 1
+print(one == one)
+print(one < one)
+print(one + one)
+// true
+// false
+// 2
+
+let array: PythonObject = [1, 2, 3]
+for (i, x) in array.enumerated() {
+  print(i, x)
+}
+// 0 1
+// 1 2
+// 2 3
+let pythonTuple = Python.tuple([1, 2, 3])
+print(pythonTuple, Python.len(pythonTuple))
+//(1, 2, 3) 3
+
+// Convert to Swift.
+let tuple = pythonTuple.tuple3
+print(tuple)
+//(1, 2, 3)
+
+// `Python.builtins` is a dictionary of all Python builtins.
+_ = Python.builtins
+
+// Try some Python builtins.
+print(Python.type(1))
+print(Python.len([1, 2, 3]))
+print(Python.sum([1, 2, 3]))
+// <class 'int'>
+// 3
+// 6
+
+// import Python modules
+let np = Python.import("numpy")
+print(np)
+//<module 'numpy' from '/home/vanh/anaconda3/lib/python3.7/site-packages/numpy/__init__.py'>
+
+let zeros = np.ones([2, 3])
+print(zeros)
+// [[1. 1. 1.]
+//  [1. 1. 1.]]
+
+
+
+//Use the throwing function Python.attemptImport to perform safe importing.
+
+let maybeModule = try? Python.attemptImport("nonexistent_module")
+print(maybeModule)
+// nil
+
+// Conversion with numpy.ndarray
+// The following Swift types can be converted to and from numpy.ndarray:
+
+// Array<Element>
+// ShapedArray<Scalar>
+// Tensor<Scalar>
+// Conversion succeeds only if the dtype of the numpy.ndarray is compatible with the Element or Scalar generic parameter type.
+
+// For Array, conversion from numpy succeeds only if the numpy.ndarray is 1-D.
+
+let numpyArray = np.ones([4], dtype: np.float32)
+print("Swift type:", type(of: numpyArray))
+print("Python type:", Python.type(numpyArray))
+print(numpyArray.shape)
+// Swift type: PythonObject
+// Python type: <class 'numpy.ndarray'>
+// (4,)
+
+// Examples of converting `numpy.ndarray` to Swift types.
+let array2: [Float] = Array(numpy: numpyArray)!
+let shapedArray = ShapedArray<Float>(numpy: numpyArray)!
+let tensor = Tensor<Float>(numpy: numpyArray)!
+
+// Examples of converting Swift types to `numpy.ndarray`.
+print(array2.makeNumpyArray())
+//[1. 1. 1. 1.]
+print(shapedArray.makeNumpyArray())
+//[1. 1. 1. 1.]
+print(tensor.makeNumpyArray())
+//[1. 1. 1. 1.]
+// Examples with different dtypes.
+let doubleArray: [Double] = Array(numpy: np.ones([3], dtype: np.float))!
+let intTensor = Tensor<Int32>(numpy: np.ones([2, 3], dtype: np.int32))!
+
+// Displaying images
+
+// // Setup. (Must be in its own cell because of https://bugs.swift.org/browse/TF-183).
+// %include "EnableIPythonDisplay.swift"
+// IPythonDisplay.shell.enable_matplotlib("inline")
+
+
+let plt = Python.import("matplotlib.pyplot")
+
+//let time = np.arange(0, 10, 0.01)
+//let amplitude = np.exp(-0.1 * time)
+//let position = amplitude * np.sin(3 * time)
+
+//plt.figure(figsize: [15, 10])
+//
+//plt.plot(time, position)
+//plt.plot(time, amplitude)
+//plt.plot(time, -amplitude)
+
+//plt.xlabel("Time (s)")
+//plt.ylabel("Position (m)")
+//plt.title("Oscillations")
+
+//plt.show()
+
+///test function for ploting 
+public func Plotdamping(){
+    let time = np.arange(0, 10, 0.01)
+    let amplitude = np.exp(-0.1 * time)
+    let position = amplitude * np.sin(3 * time)
+
+    plt.figure(figsize: [15, 10])
+
+    plt.plot(time, position)
+    plt.plot(time, amplitude)
+    plt.plot(time, -amplitude)
+
+    plt.xlabel("Time (s)")
+    plt.ylabel("Position (m)")
+    plt.title("Oscillations")
+
+    plt.show()
+
+}
+

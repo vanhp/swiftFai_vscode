@@ -1,0 +1,29 @@
+{
+  "": {
+    "swift-dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/NotebookExport.build/master.swiftdeps"
+  },
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/NotebookExport/Sources/NotebookExport/DependencyDescription.swift": {
+    "dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/NotebookExport.build/DependencyDescription.d",
+    "object": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/NotebookExport.build/DependencyDescription.swift.o",
+    "swiftmodule": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/NotebookExport.build/DependencyDescription~partial.swiftmodule",
+    "swift-dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/NotebookExport.build/DependencyDescription.swiftdeps"
+  },
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/NotebookExport/Sources/NotebookExport/ExtensionUtils.swift": {
+    "dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/NotebookExport.build/ExtensionUtils.d",
+    "object": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/NotebookExport.build/ExtensionUtils.swift.o",
+    "swiftmodule": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/NotebookExport.build/ExtensionUtils~partial.swiftmodule",
+    "swift-dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/NotebookExport.build/ExtensionUtils.swiftdeps"
+  },
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/NotebookExport/Sources/NotebookExport/NotebookExport.swift": {
+    "dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/NotebookExport.build/NotebookExport.d",
+    "object": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/NotebookExport.build/NotebookExport.swift.o",
+    "swiftmodule": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/NotebookExport.build/NotebookExport~partial.swiftmodule",
+    "swift-dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/NotebookExport.build/NotebookExport.swiftdeps"
+  },
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/NotebookExport/Sources/NotebookExport/PackageManifest.swift": {
+    "dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/NotebookExport.build/PackageManifest.d",
+    "object": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/NotebookExport.build/PackageManifest.swift.o",
+    "swiftmodule": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/NotebookExport.build/PackageManifest~partial.swiftmodule",
+    "swift-dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/NotebookExport.build/PackageManifest.swiftdeps"
+  }
+}

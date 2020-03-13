@@ -1,0 +1,11 @@
+{
+  "": {
+    "swift-dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/jupyterInstalledPackages.build/master.swiftdeps"
+  },
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/jupyterInstalledPackages.swift": {
+    "dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/jupyterInstalledPackages.build/jupyterInstalledPackages.d",
+    "object": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/jupyterInstalledPackages.build/jupyterInstalledPackages.swift.o",
+    "swiftmodule": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/jupyterInstalledPackages.build/jupyterInstalledPackages~partial.swiftmodule",
+    "swift-dependencies": "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/x86_64-unknown-linux-gnu/debug/jupyterInstalledPackages.build/jupyterInstalledPackages.swiftdeps"
+  }
+}

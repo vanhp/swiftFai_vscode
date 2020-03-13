@@ -1,0 +1,31 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+
+    // // "command": "swiftc -g ${workspaceFolder}/swiftfai_Test/Sources/swiftfai_Test/main.swift",
+    // "version": "2.0.0",
+    // "tasks": [
+    //     {
+    //         "label": "swiftc with debug",
+    //         "type": "shell",
+    //         "command": "swiftc -g ${file}",
+    //         "group": {
+    //             "kind": "build",
+    //             "isDefault": true
+    //         },
+    //         "presentation": {
+    //             "panel": "dedicated"
+    //         }
+    //     }
+    // ]
+
+    "version": "2.0.0",
+    "tasks": [
+        {   
+            "label": "swift-build",
+            "type": "shell",
+            "options": {"cwd": "${workspaceFolder}/swiftfai_Test"},            
+            "command":"swift build"
+        }
+    ]
+}

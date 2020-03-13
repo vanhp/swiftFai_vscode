@@ -1,0 +1,5 @@
+version: "Swift version 5.2-dev (Swift 91082d565a)"
+options: "625ef611101dbdf9d3a77efdfafa6dc3"
+build_time: [1580429570, 856024649]
+inputs:
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/Just/Sources/Just/Just.swift": [1580429570, 108024072]

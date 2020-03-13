@@ -1,0 +1,62 @@
+import TensorFlow
+import loadData
+import fastai_layers
+import fully_connected
+import callbacks
+import minibatch_training
+
+
+var (xTrain,yTrain,xValid,yValid) = loadMNIST(path: mnistPath, flat: true)
+let (n,m) = (xTrain.shape[0],xTrain.shape[1])
+let c = yTrain.max().scalarized()+1
+print(n,m,c)
+// 60000 784 10
+
+let nHid = 50
+
+// We can also directly define our model as an array of FADense layers:
+var model: [FADense<Float>] = [
+    FADense(m, nHid, activation: relu),
+    FADense(nHid, Int(c))] // BasicModel(nIn: m, nHid: nHid, nOut: Int(c))
+
+let data = mnistDataBunch(flat: true)
+print("count: ",data.train.count)
+// count:  938
+
+time(repeating: 10) {
+  let tst = data.train.ds
+
+  tst.first()!.yb
+}
+//average: 144.974924 ms,   min: 141.830917 ms,   max: 160.631074 ms
+
+//Check we get different batches:
+var tst = data.train.ds
+
+print("first: ",tst.first()!.yb)
+print("value: ",tst)
+print("first: ",tst.first()!.yb)
+
+public func optFunc(_ model: BasicModel) ->  SGD<BasicModel> { return SGD(for: model, learningRate: 1e-2)}
+public func modelInit() -> BasicModel {return BasicModel(nIn: m, nHid: nHid, nOut: Int(c))}
+
+
+let learner = Learner(data: data, lossFunc: crossEntropy, optFunc: optFunc, modelInit: modelInit)
+try learner.fit(2)
+
+let learner2 = Learner(data: data, lossFunc: crossEntropy, optFunc: optFunc, modelInit: modelInit)
+
+learner2.delegates = [learner2.makeTrainEvalDelegate()]
+try learner2.fit(2)
+
+let learner3 = Learner(data: data, lossFunc: crossEntropy, optFunc: optFunc, modelInit: modelInit)
+learner3.delegates = [learner3.makeTrainEvalDelegate(), learner3.makeAvgMetric(metrics: [accuracy])]
+print((mean: xTrain.mean(), std: xTrain.standardDeviation()))
+// (mean: 0.13066047, std: 0.3081074)
+let learner4 = Learner(data: data, lossFunc: crossEntropy, optFunc: optFunc, modelInit: modelInit)
+learner4.delegates = [learner4.makeTrainEvalDelegate(), learner4.makeAvgMetric(metrics: [accuracy]),
+                     learner4.makeNormalize(mean: mnistStats.mean, std: mnistStats.std)]
+
+try learner4.fit(2)
+// Epoch 0: [0.30971053, 0.9122]
+// Epoch 1: [0.2548093, 0.9257]

@@ -1,0 +1,13 @@
+version: "Swift version 5.2-dev (Swift 91082d565a)"
+options: "7eb0a7381602420437b3473ca0022697"
+build_time: [1580429570, 856724146]
+inputs:
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/Path.swift/Sources/Extensions.swift": [1580429570, 224025807]
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/Path.swift/Sources/Path+Attributes.swift": [1580429570, 224025807]
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/Path.swift/Sources/Path+Codable.swift": [1580429570, 224025807]
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/Path.swift/Sources/Path+CommonDirectories.swift": [1580429570, 224025807]
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/Path.swift/Sources/Path+FileManager.swift": [1580429570, 224025807]
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/Path.swift/Sources/Path+StringConvertibles.swift": [1580429570, 224025807]
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/Path.swift/Sources/Path+ls.swift": [1580429570, 224025807]
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/Path.swift/Sources/Path->Bool.swift": [1580429570, 224025807]
+  "/home/vanh/Development/Learn/fastai_dev/swift/swift-install/package/.build/checkouts/Path.swift/Sources/Path.swift": [1580429570, 224025807]
